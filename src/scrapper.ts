@@ -1,5 +1,4 @@
 import cheerio from 'cheerio'
-import { values } from 'ramda'
 import axios from 'axios'
 
 type formatParse = (data: string | Date | number ) => string | Date | number
@@ -56,16 +55,10 @@ export const getDataWithSelector = (
 
 export const execute = (pages: Page[]): Promise<Page[]> => {
   return Promise.all(
-    pages.map(async ({ way = 'axios', ...page }) => {
-      let html: cheerio.Root
+    pages.map(async (page) => {
+      const response = await axios.get(page.link)
+      const html = cheerio.load(response.data)
 
-      if(way === 'axios') {
-        const response = await axios.get(page.link)
-        html = cheerio.load(response.data)
-      } else {
-        html = cheerio.load('')
-      }
-      
       const searchReduce =  Object.entries(page.search).reduce(
         (acc, [item, search]) => {
           return {
